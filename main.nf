@@ -1,3 +1,14 @@
+// include modules
+
+include { busco as busco_hifiasm } from './bin/busco.nf'
+include { busco as busco_cleaned } from './bin/busco.nf'
+include { busco as busco_scaffolded } from './bin/busco.nf'
+include { quast as quast_hifiasm } from './bin/quast.nf'
+include { quast as quast_cleaned } from './bin/quast.nf'
+include { quast as quast_scaffolded } from './bin/quast.nf'
+
+// Define processes
+
 process run_hifiasm {
     publishDir "${params.outdir}/hifiasm", mode: 'symlink'
     input:
@@ -32,7 +43,7 @@ process clean_assembly {
     path genome_asm
 
     output:
-    "results/cleaned_adapter_removed/${params.id}.cleaned.adapter_removed.fasta",  emit :screened_assembly
+    path "results/cleaned_adapter_removed/${params.id}.cleaned.adapter_removed.fasta", emit: screened_assembly
 
     script:
     """
@@ -52,7 +63,7 @@ process scaffold {
 
     output:
     path "yahs.out_scaffolds_final.fa", emit: scaffolded_assembly
-    path "out_JBAT.assembly", emit_contact_matrix_asm
+    path "out_JBAT.assembly", emit: contact_matrix_asm
     path "out_JBAT.hic", emit: contact_matrix
 
     script:
@@ -64,7 +75,40 @@ process scaffold {
     """
 }
 
-
 workflow {
+    // Define input channels
+    Channel
+        .fromPath("${params.hifi_reads}/*.fastq.gz")
+        .filter { !it.name.contains('fail') }
+        .filter { !it.name.contains('gz.') }
+        .collect()
+        .set { fastq_ch }
+
+    hic1_ch = Channel.fromPath(params.hic1)
+    hic2_ch = Channel.fromPath(params.hic2)
     
+    // Run hifiasm assembly
+    run_hifiasm(fastq_ch, hic1_ch, hic2_ch)
+    
+    // QC after hifiasm
+    quast_hifiasm(run_hifiasm.out.primary_asm)
+    busco_hifiasm(run_hifiasm.out.primary_asm)
+    
+    // Clean assembly (remove adapters and contaminants)
+    clean_assembly(run_hifiasm.out.primary_asm)
+    
+    // QC after cleanup
+    quast_cleaned(clean_assembly.out.screened_assembly)
+    busco_cleaned(clean_assembly.out.screened_assembly)
+    
+    // Scaffold with Hi-C data
+    scaffold(
+        clean_assembly.out.screened_assembly,
+        hic1_ch,
+        hic2_ch
+    )
+    
+    // QC after scaffolding
+    quast_scaffolded(scaffold.out.scaffolded_assembly)
+    busco_scaffolded(scaffold.out.scaffolded_assembly)
 }
