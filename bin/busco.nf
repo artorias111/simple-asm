@@ -6,7 +6,7 @@ process busco {
     path genome_asm
 
     output:
-    path "{params.id}.busco", emit: busco_results
+    path "${params.id}.busco", emit: busco_results
 
     script:
     """

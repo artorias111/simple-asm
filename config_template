@@ -3,13 +3,13 @@ conda.enabled = true
 params {
   // required
   
-  hifi_reads = '/data2/work/Notothenioids/Hbis9/Hbis9_hifi'
-  hic1 = '/data2/2023_6HiC_library_copy1/Hbis9_GGTTGGTA-TGATACGC_L006_R1_001.fastq.gz'
-  hic2 = '/data2/2023_6HiC_library_copy1/Hbis9_GGTTGGTA-TGATACGC_L006_R2_001.fastq.gz'
+  hifi_reads = null
+  hic1 = null
+  hic2 = null
 
-  id = 'Hbis9'
-  taxid = 166258
-  nthreads = 64
+  id = null
+  taxid = null // for fcs - https://www.ncbi.nlm.nih.gov/datasets/taxonomy/tree/
+  nthreads = 18
 
 
 
@@ -18,7 +18,6 @@ params {
   nextflow_env = '/data2/work/local/miniconda/envs/nextflow'
   busco_conda = '/data2/work/local/miniconda/envs/busco583'
   quast_conda = '/data2/work/local/miniconda/envs/quast'
-  bwamem2_env = '/data2/work/local/miniconda/envs/salsa'
 
   // BUSCO parameters
   busco_lineage = 'actinopterygii_odb12' // BUSCO lineage database

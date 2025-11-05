@@ -26,10 +26,10 @@ process run_hifiasm {
     --h1 ${hic1} \\
     --h2 ${hic2} \\
     -o ${params.id} \\
-    ${fastq_reads}
+    ${fastq_reads} > hifiasm.log 2>&1
 
-    awk '/^S/{print ">"$2;print $3}' \\
-        ${params.id}.hic.p_ctg.gfa > ${params.id}.hic.p_ctg.fa
+    awk '/^S/{print ">"\$2;print \$3}' \\
+    ${params.id}.hic.p_ctg.gfa > ${params.id}.hic.p_ctg.fa
     """
 }
 
@@ -55,6 +55,8 @@ process clean_assembly {
 }
 
 process scaffold {
+    conda params.bwamem2_env
+
     publishDir "${params.outdir}/yahs", mode: 'symlink'
     input:
     path cleaned_asm
@@ -68,6 +70,7 @@ process scaffold {
 
     script:
     """
+    samtools faidx ${cleaned_asm}
     ${projectDir}/bin/YaHS-Contact-map_pipeline \\
     -g ${cleaned_asm} \\
     -a ${hic1} \\
