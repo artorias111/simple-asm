@@ -87,7 +87,7 @@ juicer_tools="/data2/work/local/juicer_tools/juicer_tools.2.20.00.jar"
 Juicer_cmd=$(grep 'JUICER_PRE CMD' out_JBAT.log | sed 's/JUICER_PRE CMD: //' | sed 's/\[I::main_pre\]//' | sed 's/Xmx36G/Xmx400G/') # Chang the memory of the last bit, i might have to re-evaluate this part.
 
 # Run Juicer command
-eval "$Juicer_cmd" 2>dev/null
+eval "$Juicer_cmd" 2>/dev/null
 
 # Example command, for gadus ogac
 # java -Xmx36G -jar ${juicer_tools} pre out_JBAT.txt out_JBAT.hic <(echo "assembly 606828627")

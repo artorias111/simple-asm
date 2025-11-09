@@ -55,6 +55,9 @@ process clean_assembly {
 }
 
 process scaffold {
+
+    errorStrategy { task.exitStatus == 56 ? 'ignore' : 'terminate' }
+
     conda params.bwamem2_env
 
     publishDir "${params.outdir}/yahs", mode: 'symlink'
