@@ -56,7 +56,7 @@ process clean_assembly {
 
 process scaffold {
 
-    errorStrategy { task.exitStatus == 56 ? 'ignore' : 'terminate' }
+    errorStrategy 'ignore' // risky code but it's a bandage
 
     conda params.bwamem2_env
 
@@ -97,15 +97,21 @@ workflow {
     run_hifiasm(fastq_ch, hic1_ch, hic2_ch)
     
     // QC after hifiasm
-    quast_hifiasm(run_hifiasm.out.primary_asm)
-    busco_hifiasm(run_hifiasm.out.primary_asm)
+    hifiasm_qc_ch = run_hifiasm.out.primary_asm
+                        .map { asm -> tuple(asm, 'hifaism_asm') }
+    
+    quast_hifiasm(hifiasm_qc_ch)
+    busco_hifiasm(hifiasm_qc_ch)
     
     // Clean assembly (remove adapters and contaminants)
     clean_assembly(run_hifiasm.out.primary_asm)
     
+    fcs_qc_ch = clean_assembly.out.screened_assembly
+                    .map { asm -> tuple(asm, 'fcs_asm') }
+
     // QC after cleanup
-    quast_cleaned(clean_assembly.out.screened_assembly)
-    busco_cleaned(clean_assembly.out.screened_assembly)
+    quast_cleaned(fcs_qc_ch)
+    busco_cleaned(fcs_qc_ch)
     
     // Scaffold with Hi-C data
     scaffold(
@@ -113,8 +119,16 @@ workflow {
         hic1_ch,
         hic2_ch
     )
-    
+
+    // QC after scaffolding (only if scaffold succeeded and produced output)
+    yahs_qc_ch = scaffold.out.scaffolded_assembly
+                    .ifEmpty { 
+                        log.warn "Scaffold process did not produce output, skipping scaffold QC steps"
+                        Channel.empty()
+                    }
+                    .map { asm -> tuple(asm, 'yahs_asm') }
+
     // QC after scaffolding
-    quast_scaffolded(scaffold.out.scaffolded_assembly)
-    busco_scaffolded(scaffold.out.scaffolded_assembly)
+    quast_scaffolded(yahs_qc_ch)
+    busco_scaffolded(yahs_qc_ch)
 }

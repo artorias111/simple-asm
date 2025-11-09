@@ -3,14 +3,14 @@ process busco {
     publishDir "${params.outdir}/busco", mode: 'symlink'
 
     input:
-    path genome_asm
+    tuple path(genome_asm), val(asm_id)
 
     output:
-    path "${params.id}.busco", emit: busco_results
+    path "${params.id}.${asm_id}.busco", emit: busco_results
 
     script:
     """
-    busco -o ${params.id}.busco \\
+    busco -o ${params.id}.${asm_id}.busco \\
     -i ${genome_asm} \\
     -m geno \\
     -l ${params.busco_lineage} \\

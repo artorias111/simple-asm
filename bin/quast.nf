@@ -4,14 +4,14 @@ process quast {
     publishDir "${params.outdir}/quast", mode: 'symlink'
 
     input:
-    path genome_asm
+    tuple path(genome_asm), val(asm_id) 
 
     output:
-    path "${params.id}.quast", emit: quast_results
+    path "${params.id}.${asm_id}.quast", emit: quast_results
 
     script:
     """
-    quast -o ${params.id}.quast -t ${params.nthreads} \\
+    quast -o ${params.id}.${asm_id}.quast -t ${params.nthreads} \\
     ${genome_asm}
     """
 }
