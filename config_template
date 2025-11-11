@@ -18,6 +18,8 @@ params {
   nextflow_env = '/data2/work/local/miniconda/envs/nextflow'
   busco_conda = '/data2/work/local/miniconda/envs/busco583'
   quast_conda = '/data2/work/local/miniconda/envs/quast'
+  bwamem2_env = '/data2/work/local/miniconda/envs/salsa'
+
 
   // BUSCO parameters
   busco_lineage = 'actinopterygii_odb12' // BUSCO lineage database
