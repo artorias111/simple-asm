@@ -12,6 +12,6 @@ process quast {
     script:
     """
     quast -o ${params.id}.${asm_id}.quast -t ${params.nthreads} \\
-    ${genome_asm}
+    --report-all-metrics ${genome_asm}
     """
 }
