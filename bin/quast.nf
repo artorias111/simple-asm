@@ -11,8 +11,11 @@ process quast {
 
     script:
     """
-    quast -o ${params.id}.${asm_id}.quast -t ${params.nthreads} \\
-    --k-mer-stats --x-for-Nx 90 \\
-    --report-all-metrics ${genome_asm}
+    quast -o ${params.id}.${asm_id}.quast \\
+    -t ${params.nthreads} \\
+    --x-for-Nx 90 \\
+    --plots-format png \\
+    --split-scaffolds \\
+    ${genome_asm}
     """
 }
