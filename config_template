@@ -1,8 +1,4 @@
-conda.enabled = true
-
 params {
-  // required
-  
   hifi_reads = null
   hic1 = null
   hic2 = null
@@ -10,22 +6,4 @@ params {
   id = null
   taxid = null // for fcs - https://www.ncbi.nlm.nih.gov/datasets/taxonomy/tree/
   nthreads = 18
-
-
-
-  // hard-coded tool paths for Polar2020
-
-  nextflow_env = '/data2/work/local/miniconda/envs/nextflow'
-  busco_conda = '/data2/work/local/miniconda/envs/busco583'
-  quast_conda = '/data2/work/local/miniconda/envs/quast'
-  bwamem2_env = '/data2/work/local/miniconda/envs/salsa'
-
-
-  // BUSCO parameters
-  busco_lineage = 'actinopterygii_odb12' // BUSCO lineage database
-  busco_db_path = '/data2/busco_June2024/busco_downloads' // Path to BUSCO database
-
-  // output directory
-
-  outdir = './results'
 }
