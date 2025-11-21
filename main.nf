@@ -81,7 +81,7 @@ process scaffold {
     """
 }
 
-workflow {
+workflow assemble {
     // Define input channels
     Channel
         .fromPath("${params.hifi_reads}/*.fastq.gz")
@@ -131,4 +131,24 @@ workflow {
     // QC after scaffolding
     quast_scaffolded(yahs_qc_ch)
     busco_scaffolded(yahs_qc_ch)
+}
+
+
+workflow qbu {
+    asm = Channel.fromPath(params.genome)
+            .map{asm -> tuple(asm, "asm")}
+
+    quast_hifiasm(asm)
+    busco_hifiasm(asm)
+}
+
+workflow {
+    if (params.mode == 'assemble') {
+        assemble()
+    }
+
+    if (params.mode =='qbu') {
+        qbu()
+    }
+
 }
