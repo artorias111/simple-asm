@@ -17,9 +17,8 @@ Note: do not modify or edit `nextflow.config` unless you know what you're doing.
 You can use an existing assembly and run assembly metrics on them with the mode `qbu`, passed as a flag during run time. This doesn't need you to copy any config files or templates. you still need to provide an ID. Here's how you'd run the `qbu` mode: 
 
 ```shell
-```
 nextflow run artorias111/simple-asm --mode qbu --genome /path/to/assembly.fa --id asm-id
-
+```
 
 #### Results
 Results are in the `work` directory, but you also have access to the symlinks of the actual files organized in the `results` directory, so you're not lost in the sea of hex-coded directories in `work`. 
