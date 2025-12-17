@@ -10,6 +10,8 @@ include { quast as quast_scaffolded } from './bin/quast.nf'
 // Define processes
 
 process run_hifiasm {
+    conda params.hifiasm_env
+
     publishDir "${params.outdir}/hifiasm", mode: 'symlink'
     input:
     path fastq_reads
