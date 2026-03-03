@@ -122,12 +122,8 @@ workflow assemble {
         hic2_ch
     )
 
-    // QC after scaffolding (only if scaffold succeeded and produced output)
+    // QC after scaffolding
     yahs_qc_ch = scaffold.out.scaffolded_assembly
-                    .ifEmpty { 
-                        log.warn "Scaffold process did not produce output, skipping scaffold QC steps"
-                        Channel.empty()
-                    }
                     .map { asm -> tuple(asm, 'yahs_asm') }
 
     // QC after scaffolding
