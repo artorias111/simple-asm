@@ -79,7 +79,8 @@ process scaffold {
     ${projectDir}/bin/YaHS-Contact-map_pipeline \\
     -g ${cleaned_asm} \\
     -a ${hic1} \\
-    -b ${hic2}
+    -b ${hic2} \\
+    -t ${params.nthreads}
     """
 }
 
