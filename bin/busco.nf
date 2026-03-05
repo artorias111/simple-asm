@@ -2,6 +2,8 @@ process busco {
     conda params.busco_conda
     publishDir "${params.outdir}/busco", mode: 'symlink'
 
+    cpus params.nthreads
+
     input:
     tuple path(genome_asm), val(asm_id)
 
@@ -15,7 +17,7 @@ process busco {
     -m geno \\
     -l ${params.busco_lineage} \\
     --download_path ${params.busco_db_path} \\
-    -c ${params.nthreads} \\
+    -c ${task.cpus} \\
     --offline
     """
 }
