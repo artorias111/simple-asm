@@ -1,4 +1,6 @@
 process busco {
+    label 'busco'
+
     conda params.busco_conda
     publishDir "${params.outdir}/busco", mode: 'symlink'
 
