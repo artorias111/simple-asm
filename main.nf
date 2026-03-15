@@ -118,12 +118,9 @@ workflow assemble {
 
 
     // merqury
-    merqury_ch = Channel
-                    .zip(
-                        run_hifiasm.out.primary_asm,
-                        run_hifiasm.out.hap1_asm,
-                        run_hifiasm.out.hap2_asm
-                    )
+    merqury_ch = run_hifiasm.out.primary_asm
+                    .combine(run_hifiasm.out.hap1_asm)
+                    .combine(run_hifiasm.out.hap2_asm)
                     .map { primary, hap1, hap2 ->
                         def reads_pattern = "${params.hifi_reads}/*.fastq.gz"
                         tuple(reads_pattern, primary, hap1, hap2, params.id)
