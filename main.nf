@@ -118,8 +118,15 @@ workflow assemble {
 
 
     // merqury
+    merqury_ch = run_hifiasm.out.primary_asm
+                    .combine(run_hifiasm.out.hap1_asm)
+                    .combine(run_hifiasm.out.hap2_asm)
+                    .map { primary, hap1, hap2 ->
+                        def reads_pattern = "${params.hifi_reads}/*.fastq.gz"
+                        tuple(reads_pattern, primary, hap1, hap2, params.id)
+                    }
 
-    hap_channel = 
+    run_merqury(merqury_ch)
     
     // Clean assembly (remove adapters and contaminants)
     clean_assembly(run_hifiasm.out.primary_asm)
