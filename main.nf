@@ -6,6 +6,7 @@ include { busco as busco_scaffolded } from './bin/busco.nf'
 include { quast as quast_hifiasm } from './bin/quast.nf'
 include { quast as quast_cleaned } from './bin/quast.nf'
 include { quast as quast_scaffolded } from './bin/quast.nf'
+include { run_merqury } from './bin/merqury.nf'
 
 // Define processes
 
@@ -21,6 +22,8 @@ process run_hifiasm {
     output:
     path "${params.id}.hic.p_ctg.fa", emit: primary_asm
     path "hifiasm.log", emit: hifiasm_log
+    path "${params.id}.hic.hap1.p_ctg.fa", emit: hap1_asm
+    path "${params.id}.hic.hap2.p_ctg.fa", emit: hap2_asm
 
     script:
     """
@@ -32,6 +35,13 @@ process run_hifiasm {
 
     awk '/^S/{print ">"\$2;print \$3}' \\
     ${params.id}.hic.p_ctg.gfa > ${params.id}.hic.p_ctg.fa
+
+
+    awk '/^S/{print ">"\$2;print \$3}' \\
+    ${params.id}.hic.hap1.p_ctg.gfa > ${params.id}.hic.hap1.p_ctg.fa
+
+    awk '/^S/{print ">"\$2;print \$3}' \\
+    ${params.id}.hic.hap2.p_ctg.gfa > ${params.id}.hic.hap2.p_ctg.fa
     """
 }
 
@@ -105,6 +115,11 @@ workflow assemble {
     
     quast_hifiasm(hifiasm_qc_ch)
     busco_hifiasm(hifiasm_qc_ch)
+
+
+    // merqury
+
+    hap_channel = 
     
     // Clean assembly (remove adapters and contaminants)
     clean_assembly(run_hifiasm.out.primary_asm)
