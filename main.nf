@@ -97,7 +97,7 @@ process scaffold {
 workflow assemble {
     // Define input channels
     Channel
-        .fromPath("${params.hifi_reads}/*.fastq.gz")
+        .fromPath("${params.hifi_reads}/*.gz")
         .filter { !it.name.contains('fail') }
         .filter { !it.name.contains('gz.') }
         .collect()
