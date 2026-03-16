@@ -118,11 +118,13 @@ workflow assemble {
 
 
     // merqury
+    def merqury_reads_dir = params.merqury_reads ?: params.hifi_reads
+
     merqury_ch = run_hifiasm.out.primary_asm
                     .combine(run_hifiasm.out.hap1_asm)
                     .combine(run_hifiasm.out.hap2_asm)
                     .map { primary, hap1, hap2 ->
-                        def reads_pattern = "${params.hifi_reads}/*.fastq.gz"
+                        def reads_pattern = "${merqury_reads_dir}/*.fastq.gz"
                         tuple(reads_pattern, primary, hap1, hap2, params.id)
                     }
 
