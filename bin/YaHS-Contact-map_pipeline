@@ -21,6 +21,8 @@
 
 # -----------------------------------------
 
+YAHS_DIR="/data2/work/local/yahs-1.22"
+
 assembly=""
 r1=""
 r2=""
@@ -73,7 +75,7 @@ BWA_MEM_EXIT=$?
 # part 2 : run yahs
 
 echo "Runing YaHS"
-/data2/work/local/yahs/yahs $assembly aligned.bam |& tee yahs.tmux.log
+${YAHS_DIR}/yahs $assembly aligned.bam |& tee yahs.tmux.log
 YAHS_EXIT=$?
 
 # Part 2.5: run QUAST in the background for the YAHS assembly
@@ -92,7 +94,7 @@ juicer_tools="/data2/work/local/juicer_tools/juicer_tools.2.20.00.jar"
 
 # Only run juicer if yahs succeeded and required files exist
 if [ $YAHS_EXIT -eq 0 ] && [ -f "$yahs_scaffold_bin_file" ] && [ -f "$yahs_scaffold_agp_file" ] && [ -f "$contigs_index" ]; then
-  /data2/work/local/yahs/juicer pre -a -o out_JBAT $yahs_scaffold_bin_file $yahs_scaffold_agp_file $contigs_index >out_JBAT.log 2>&1
+  ${YAHS_DIR}/juicer pre -a -o out_JBAT $yahs_scaffold_bin_file $yahs_scaffold_agp_file $contigs_index >out_JBAT.log 2>&1
 
   # Filter the juicer command output for the downstread command
   # this command uses a LOT of memory, so just a heads up - 400 GB
