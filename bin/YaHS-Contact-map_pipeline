@@ -21,10 +21,13 @@
 
 # -----------------------------------------
 
+YAHS_DIR="/data2/work/local/yahs-1.22"
+
 assembly=""
 r1=""
 r2=""
 bed_file=""
+nthreads=8
 
 while getopts ":g:a:b:" opt; do
   case $opt in
@@ -37,6 +40,9 @@ while getopts ":g:a:b:" opt; do
     ;;
   b)
     r2=$OPTARG
+    ;;
+  t)
+    nthreads=$OPTARG
     ;;
   esac
 done
@@ -57,19 +63,19 @@ echo "Aligning Hi-C reads"
 #
 # Index the assembly
 
-set +e  # Don't exit on error, continue execution
+set +e # Don't exit on error, continue execution
 
 bwa-mem2 index $assembly 2>bwa_index.err.log
 BWA_INDEX_EXIT=$?
 
 # Run the aligner
-bwa-mem2 mem -SP5M -t 120 $assembly $r1 $r2 | /data2/work/local/samblaster/samblaster | samtools view -h -b -F 2316 --threads 120 -o aligned.bam
+bwa-mem2 mem -SP5M -t ${nthreads} $assembly $r1 $r2 | /data2/work/local/samblaster/samblaster | samtools view -h -b -F 2316 --threads ${nthreads} -o aligned.bam
 BWA_MEM_EXIT=$?
 
 # part 2 : run yahs
 
 echo "Runing YaHS"
-/data2/work/local/yahs/yahs $assembly aligned.bam |& tee yahs.tmux.log
+${YAHS_DIR}/yahs $assembly aligned.bam |& tee yahs.tmux.log
 YAHS_EXIT=$?
 
 # Part 2.5: run QUAST in the background for the YAHS assembly
@@ -88,29 +94,30 @@ juicer_tools="/data2/work/local/juicer_tools/juicer_tools.2.20.00.jar"
 
 # Only run juicer if yahs succeeded and required files exist
 if [ $YAHS_EXIT -eq 0 ] && [ -f "$yahs_scaffold_bin_file" ] && [ -f "$yahs_scaffold_agp_file" ] && [ -f "$contigs_index" ]; then
-    /data2/work/local/yahs/juicer pre -a -o out_JBAT $yahs_scaffold_bin_file $yahs_scaffold_agp_file $contigs_index >out_JBAT.log 2>&1
-    
-    # Filter the juicer command output for the downstread command
-    Juicer_cmd=$(grep 'JUICER_PRE CMD' out_JBAT.log | sed 's/JUICER_PRE CMD: //' | sed 's/\[I::main_pre\]//' | sed 's/Xmx36G/Xmx400G/') # Chang the memory of the last bit, i might have to re-evaluate this part.
-    
-    # Run Juicer command
-    if [ -n "$Juicer_cmd" ]; then
-        eval "$Juicer_cmd" 2>/dev/null
-    fi
+  ${YAHS_DIR}/juicer pre -a -o out_JBAT $yahs_scaffold_bin_file $yahs_scaffold_agp_file $contigs_index >out_JBAT.log 2>&1
+
+  # Filter the juicer command output for the downstread command
+  # this command uses a LOT of memory, so just a heads up - 400 GB
+  Juicer_cmd=$(grep 'JUICER_PRE CMD' out_JBAT.log | sed 's/JUICER_PRE CMD: //' | sed 's/\[I::main_pre\]//' | sed 's/Xmx36G/Xmx400G/') # Chang the memory of the last bit, i might have to re-evaluate this part.
+
+  # Run Juicer command
+  if [ -n "$Juicer_cmd" ]; then
+    eval "$Juicer_cmd" 2>/dev/null
+  fi
 fi
 
 # Ensure output files exist even if steps failed (for Nextflow errorStrategy 'ignore')
 if [ ! -f "yahs.out_scaffolds_final.fa" ]; then
-    echo "Warning: YaHS scaffolding failed, creating empty output file" >&2
-    touch yahs.out_scaffolds_final.fa
+  echo "Warning: YaHS scaffolding failed, creating empty output file" >&2
+  touch yahs.out_scaffolds_final.fa
 fi
 
 if [ ! -f "out_JBAT.assembly" ]; then
-    touch out_JBAT.assembly
+  touch out_JBAT.assembly
 fi
 
 if [ ! -f "out_JBAT.hic" ]; then
-    touch out_JBAT.hic
+  touch out_JBAT.hic
 fi
 
 # Exit with 0 to prevent Nextflow from treating this as a failure

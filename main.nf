@@ -79,14 +79,15 @@ process scaffold {
     ${projectDir}/bin/YaHS-Contact-map_pipeline \\
     -g ${cleaned_asm} \\
     -a ${hic1} \\
-    -b ${hic2}
+    -b ${hic2} \\
+    -t ${params.nthreads}
     """
 }
 
 workflow assemble {
     // Define input channels
     Channel
-        .fromPath("${params.hifi_reads}/*.fastq.gz")
+        .fromPath("${params.hifi_reads}/*.gz")
         .filter { !it.name.contains('fail') }
         .filter { !it.name.contains('gz.') }
         .collect()
@@ -122,12 +123,8 @@ workflow assemble {
         hic2_ch
     )
 
-    // QC after scaffolding (only if scaffold succeeded and produced output)
+    // QC after scaffolding
     yahs_qc_ch = scaffold.out.scaffolded_assembly
-                    .ifEmpty { 
-                        log.warn "Scaffold process did not produce output, skipping scaffold QC steps"
-                        Channel.empty()
-                    }
                     .map { asm -> tuple(asm, 'yahs_asm') }
 
     // QC after scaffolding
