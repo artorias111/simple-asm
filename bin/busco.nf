@@ -18,9 +18,7 @@ process busco {
     -i ${genome_asm} \\
     -m geno \\
     -l ${params.busco_lineage} \\
-    --download_path ${params.busco_db_path} \\
     -c ${task.cpus} \\
-    --offline
     """
 }
 
